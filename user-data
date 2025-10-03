@@ -1,0 +1,20 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  storage:
+    layout:
+      name: direct
+  identity:
+    hostname: ubuntu-template
+    username: ubuntu
+    password: "$6$/ts46XGt5PjZa0v6$75g7Am55XegkDfbf2NfgIHoX8egKaKlHr4cbxg2SSGxjDhq7U8V9GMG9dF4ORfJuZyr2RIDUWg83FqQ8PJ.ai1"
+  ssh:
+    install-server: yes
+    allow-pw: yes
+  packages:
+    - qemu-guest-agent
+  late-commands:
+    - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu

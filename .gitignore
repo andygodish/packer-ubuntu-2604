@@ -1,0 +1,23 @@
+# Packer variable files with secrets
+*.pkrvars.hcl
+
+# Packer cache
+packer_cache/
+
+# Packer output artifacts
+output-*/
+*.box
+
+# Packer crash logs
+crash.log
+
+# Mac files
+.DS_Store
+
+# Editor files
+.vscode/
+*.swp
+*.swo
+*~
+
+downloaded_iso_path/

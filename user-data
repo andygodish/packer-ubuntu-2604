@@ -4,6 +4,11 @@ autoinstall:
   locale: en_US.UTF-8
   keyboard:
     layout: us
+  network:
+    version: 2
+    ethernets:
+      ens18:
+        dhcp4: true
   storage:
     layout:
       name: direct
@@ -12,9 +17,22 @@ autoinstall:
     username: ubuntu
     password: "$6$/ts46XGt5PjZa0v6$75g7Am55XegkDfbf2NfgIHoX8egKaKlHr4cbxg2SSGxjDhq7U8V9GMG9dF4ORfJuZyr2RIDUWg83FqQ8PJ.ai1"
   ssh:
-    install-server: yes
-    allow-pw: yes
+    install-server: true
+    allow-pw: true
   packages:
     - qemu-guest-agent
+    - cloud-init
+    - openssh-server
+  user-data:
+    disable_root: true
+  package_update: true
+  package_upgrade: true
+  early-commands:
+    - systemctl stop systemd-networkd-wait-online.service
+    - systemctl mask systemd-networkd-wait-online.service
+    - echo 'DefaultTimeoutStartSec=30s' >> /etc/systemd/system.conf
+    - systemctl daemon-reload
   late-commands:
     - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
+    - chmod 440 /target/etc/sudoers.d/ubuntu
+    - curtin in-target --target=/target -- systemctl enable qemu-guest-agent

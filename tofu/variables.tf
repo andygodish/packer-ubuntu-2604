@@ -18,3 +18,9 @@ variable "proxmox_node" {
   type        = string
   description = "Proxmox node name"
 }
+
+variable "vm_hostname" {
+  type        = string
+  description = "Hostname for the VM"
+  default     = "ubuntu-test"
+}

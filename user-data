@@ -25,6 +25,15 @@ autoinstall:
     - openssh-server
   user-data:
     disable_root: true
+    preserve_hostname: false
+    users:
+      - name: andy
+        groups: [adm, sudo]
+        shell: /bin/bash
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        ssh_authorized_keys:
+          - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDgSTbhezrWTEX84l4sbyIQfuzLnTjKKmOjV+CdwDiApvfhdbV9V4DH+qlQfEbp0GRsf1tMU7GSqvlVeGS2KVmU= andy@yourdomain
+
   package_update: true
   package_upgrade: true
   early-commands:
@@ -36,3 +45,19 @@ autoinstall:
     - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
     - chmod 440 /target/etc/sudoers.d/ubuntu
     - curtin in-target --target=/target -- systemctl enable qemu-guest-agent
+    - |
+      cat > /target/etc/systemd/system/enable-cloud-init.service << 'EOF'
+      [Unit]
+      Description=Re-enable cloud-init for cloned VMs
+      Before=cloud-init-local.service
+      ConditionPathExists=/etc/cloud/cloud-init.disabled
+
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/rm -f /etc/cloud/cloud-init.disabled
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=cloud-init.target
+      EOF
+    - curtin in-target --target=/target -- systemctl enable enable-cloud-init.service

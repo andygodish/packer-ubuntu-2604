@@ -113,6 +113,7 @@ The build takes approximately 10 minutes and:
 ### Cloud-Init Configuration
 
 The template includes a cloud-init drive. Configure via Proxmox UI:
+
 - Cloud-Init tab
 - Set user, password, SSH keys
 - Configure network settings
@@ -136,6 +137,7 @@ The template includes a cloud-init drive. Configure via Proxmox UI:
 **Cause:** Boot commands not executing properly.
 
 **Solutions:**
+
 - Verify `http_directory` is correct
 - Check `user-data` and `meta-data` files exist
 - Ensure DHCP is available on network
@@ -250,6 +252,7 @@ This project is provided as-is for educational and operational purposes.
 ## Contributing
 
 Improvements welcome! Key areas:
+
 - Additional OS support (Debian, Rocky, etc.)
 - Enhanced security hardening
 - Automated testing

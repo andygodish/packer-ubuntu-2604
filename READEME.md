@@ -24,7 +24,7 @@ make clean
 
 ## Project Structure
 
-```
+```bash
 .
 ├── ubuntu.pkr.hcl       # Packer configuration
 ├── ubuntu.pkrvars.hcl   # Variables (gitignored)
@@ -62,6 +62,7 @@ Update the `password` field in `user-data` with the generated hash.
 ### 3. Customize user-data
 
 Edit `user-data` to customize:
+
 - Hostname
 - Locale/keyboard
 - Packages
@@ -82,6 +83,7 @@ The build takes approximately 10 minutes and:
 ## Template Details
 
 **Hardware:**
+
 - 2GB RAM
 - 2 CPU cores
 - 20GB disk (raw format)
@@ -89,6 +91,7 @@ The build takes approximately 10 minutes and:
 - SCSI controller
 
 **Software:**
+
 - Ubuntu 24.04.3 LTS
 - OpenSSH server
 - QEMU guest agent
@@ -96,6 +99,7 @@ The build takes approximately 10 minutes and:
 - Latest security updates
 
 **Default Credentials:**
+
 - Username: `ubuntu`
 - Password: `ubuntu` (change in production!)
 - Sudo: Passwordless
@@ -183,7 +187,7 @@ build {
 
 ### Update Ubuntu ISO
 
-1. Download new ISO from https://releases.ubuntu.com/24.04/
+1. Download new ISO from [ubuntu release page](https://releases.ubuntu.com/24.04/)
 2. Get SHA256 checksum from `SHA256SUMS` file
 3. Update `iso_url` and `iso_checksum` in `ubuntu.pkr.hcl`
 4. Run `make validate` and `make build`

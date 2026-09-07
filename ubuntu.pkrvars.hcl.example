@@ -9,3 +9,6 @@ ubuntu_iso_checksum = "sha256:cc8a95cde20f6ced61a322420de00f10cc3c90ced545daa46c
 
 # Install Docker Engine, Buildx, and the Compose plugin into the template.
 install_docker = true
+
+# Install the Packer CLI into the template.
+install_packer = true

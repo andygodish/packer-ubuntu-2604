@@ -7,6 +7,7 @@ packer {
   }
 }
 
+
 variable "proxmox_url" {
   type        = string
   description = "Proxmox API URL"
@@ -45,6 +46,12 @@ variable "ubuntu_iso_checksum" {
 variable "install_docker" {
   type        = bool
   description = "Install Docker Engine and Compose plugin into the template"
+  default     = true
+}
+
+variable "install_packer" {
+  type        = bool
+  description = "Install the Packer CLI into the template"
   default     = true
 }
 
@@ -148,6 +155,22 @@ build {
       "sudo apt-get update",
       "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
       "sudo usermod -aG docker ubuntu"
+    ]
+  }
+
+  provisioner "shell" {
+    environment_vars = [
+      "INSTALL_PACKER=${var.install_packer}"
+    ]
+
+    inline = [
+      "if [ \"$INSTALL_PACKER\" != \"true\" ]; then echo \"Skipping Packer installation.\"; exit 0; fi",
+      "sudo apt-get install -y ca-certificates curl gnupg wget",
+      "sudo install -m 0755 -d /etc/apt/keyrings",
+      "wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/hashicorp-archive-keyring.gpg",
+      ". /etc/os-release && echo \"deb [signed-by=/etc/apt/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $${VERSION_CODENAME} main\" | sudo tee /etc/apt/sources.list.d/hashicorp.list >/dev/null",
+      "sudo apt-get update",
+      "sudo apt-get install -y packer"
     ]
   }
 }

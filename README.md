@@ -88,6 +88,8 @@ make clean
 
 `make test` aliases `make validate` because `make build` talks to Proxmox and creates/replaces infrastructure artifacts.
 
+The built template records the packer project version at `/etc/packer-ubuntu-2604/version.txt`. Check a cloned VM with `cat /etc/packer-ubuntu-2604/version.txt`.
+
 ## Autoinstall
 
 The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs.

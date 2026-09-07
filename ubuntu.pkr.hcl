@@ -107,6 +107,19 @@ source "proxmox-iso" "ubuntu" {
 build {
   sources = ["source.proxmox-iso.ubuntu"]
 
+  provisioner "file" {
+    source      = "version.txt"
+    destination = "/tmp/packer-ubuntu-2604-version.txt"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo install -d -m 0755 /etc/packer-ubuntu-2604",
+      "sudo install -m 0644 /tmp/packer-ubuntu-2604-version.txt /etc/packer-ubuntu-2604/version.txt",
+      "sudo rm -f /tmp/packer-ubuntu-2604-version.txt"
+    ]
+  }
+
   provisioner "shell" {
     inline = [
       "sudo apt-get update",

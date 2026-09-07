@@ -39,7 +39,7 @@ Container-style release tags should still be normalized with one leading `v` whe
 
 `renovate.json` is optional but useful as a point-release notifier for the Ubuntu 26.04 release directory. It watches the live-server ISO filename and can open a PR when media such as `26.04.2` appears.
 
-Renovate does not update `ubuntu_iso_checksum` in this repo. When Renovate updates `ubuntu_version`, update the checksum from Ubuntu's `SHA256SUMS` file before building. If that manual checksum step becomes noisy, remove Renovate or replace it with a small checksum-aware updater.
+Renovate does not update `ubuntu_iso_checksum` in this repo. When Renovate updates `ubuntu_version`, update the checksum from Ubuntu's `SHA256SUMS` file before building. The manual checksum process is documented in docs/ubuntu-iso-checksum.md. If that manual checksum step becomes noisy, remove Renovate or replace it with a small checksum-aware updater.
 
 ## Local Configuration
 

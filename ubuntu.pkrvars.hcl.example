@@ -6,3 +6,6 @@ proxmox_node     = "your-node-name"
 # Match the pinned upstream values in ubuntu.pkr.hcl.
 ubuntu_version      = "26.04.1"
 ubuntu_iso_checksum = "sha256:cc8a95cde20f6ced61a322420de00f10cc3c90ced545daa46cb9c1a117f1d927"
+
+# Install Docker Engine, Buildx, and the Compose plugin into the template.
+install_docker = true

@@ -42,6 +42,12 @@ variable "ubuntu_iso_checksum" {
   default     = "sha256:cc8a95cde20f6ced61a322420de00f10cc3c90ced545daa46cb9c1a117f1d927"
 }
 
+variable "install_docker" {
+  type        = bool
+  description = "Install Docker Engine and Compose plugin into the template"
+  default     = true
+}
+
 locals {
   ubuntu_version_name = replace(var.ubuntu_version, ".", "-")
   ubuntu_iso_name = "ubuntu-${var.ubuntu_version}-live-server-amd64.iso"
@@ -124,6 +130,24 @@ build {
     inline = [
       "sudo apt-get update",
       "sudo apt-get upgrade -y"
+    ]
+  }
+
+  provisioner "shell" {
+    environment_vars = [
+      "INSTALL_DOCKER=${var.install_docker}"
+    ]
+
+    inline = [
+      "if [ \"$INSTALL_DOCKER\" != \"true\" ]; then echo \"Skipping Docker installation.\"; exit 0; fi",
+      "sudo apt-get install -y ca-certificates curl gnupg",
+      "sudo install -m 0755 -d /etc/apt/keyrings",
+      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
+      "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
+      ". /etc/os-release && echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $${VERSION_CODENAME} stable\" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null",
+      "sudo apt-get update",
+      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
+      "sudo usermod -aG docker ubuntu"
     ]
   }
 }

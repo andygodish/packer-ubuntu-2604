@@ -18,6 +18,7 @@ This repo is part of the standalone `packer-*` series: it owns template build in
 | Template CPU | `2` cores |
 | Network | `vmbr0`, DHCP |
 | Cloud-init | enabled on Proxmox `local` storage |
+| Container runtime | Docker Engine from Docker apt repo when `install_docker = true`, unpinned at template build time |
 
 Packer downloads the pinned Ubuntu installer ISO, uploads/uses it through Proxmox, serves the checked-in autoinstall seed files, installs Ubuntu into a temporary VM, runs provisioning, and converts the result to a reusable Proxmox template.
 
@@ -92,7 +93,7 @@ The built template records the packer project version at `/etc/packer-ubuntu-260
 
 ## Autoinstall
 
-The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs.
+The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs. Packer provisioning installs Docker Engine, Buildx, and the Compose plugin from Docker's apt repo when `install_docker = true` so cloned VMs are ready for compose-backed services. Set `install_docker = false` in `ubuntu.pkrvars.hcl` to build a smaller base template without Docker.
 
 The default installer identity is only for the template build path. Review users, SSH keys, and password settings before treating this as a production baseline.
 

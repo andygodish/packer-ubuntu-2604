@@ -28,6 +28,26 @@ variable "proxmox_node" {
   description = "Proxmox node name"
 }
 
+
+# renovate: datasource=custom.ubuntu-releases depName=ubuntu-live-server-amd64 versioning=loose
+variable "ubuntu_version" {
+  type        = string
+  description = "Ubuntu live-server ISO version"
+  default     = "26.04.1"
+}
+
+variable "ubuntu_iso_checksum" {
+  type        = string
+  description = "SHA256 checksum for the pinned Ubuntu live-server ISO"
+  default     = "sha256:cc8a95cde20f6ced61a322420de00f10cc3c90ced545daa46cb9c1a117f1d927"
+}
+
+locals {
+  ubuntu_version_name = replace(var.ubuntu_version, ".", "-")
+  ubuntu_iso_name = "ubuntu-${var.ubuntu_version}-live-server-amd64.iso"
+  ubuntu_iso_url  = "https://releases.ubuntu.com/26.04/${local.ubuntu_iso_name}"
+}
+
 source "proxmox-iso" "ubuntu" {
   proxmox_url              = var.proxmox_url
   username                 = var.proxmox_username
@@ -35,12 +55,12 @@ source "proxmox-iso" "ubuntu" {
   node                     = var.proxmox_node
   insecure_skip_tls_verify = true
 
-  vm_name              = "ubuntu-2404-template"
-  template_description = "Ubuntu 24.04 base template"
+  vm_name              = "ubuntu-${local.ubuntu_version_name}-template"
+  template_description = "Ubuntu ${var.ubuntu_version} base template"
 
   boot_iso {
-    iso_url          = "https://releases.ubuntu.com/24.04/ubuntu-24.04.3-live-server-amd64.iso"
-    iso_checksum     = "sha256:c3514bf0056180d09376462a7a1b4f213c1d6e8ea67fae5c25099c6fd3d8274b"
+    iso_url          = local.ubuntu_iso_url
+    iso_checksum     = var.ubuntu_iso_checksum
     iso_storage_pool = "local"
     unmount          = true
   }
@@ -56,8 +76,6 @@ source "proxmox-iso" "ubuntu" {
   network_adapters {
     model       = "virtio"
     bridge      = "vmbr0"
-    mac_address = "repeatable"
-    mtu         = 1
   }
 
   disks {
@@ -76,14 +94,14 @@ source "proxmox-iso" "ubuntu" {
 
   boot_command = [
     "c<wait>",
-    "linux /casper/vmlinuz --- ip=::::::dhcp::: autoinstall ds='nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<enter><wait5s>",
+    "linux /casper/vmlinuz --- autoinstall ip=dhcp ds='nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}'<enter><wait5s>",
     "initrd /casper/initrd<enter><wait5s>",
     "boot<enter><wait5s>"
   ]
 
   ssh_username = "ubuntu"
   ssh_password = "ubuntu"
-  ssh_timeout  = "20m"
+  ssh_timeout  = "45m"
 }
 
 build {
@@ -91,7 +109,6 @@ build {
 
   provisioner "shell" {
     inline = [
-      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
       "sudo apt-get update",
       "sudo apt-get upgrade -y"
     ]

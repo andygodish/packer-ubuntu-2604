@@ -4,11 +4,12 @@ autoinstall:
   locale: en_US.UTF-8
   keyboard:
     layout: us
-  network:
-    version: 2
-    ethernets:
-      ens18:
-        dhcp4: true
+  apt:
+    geoip: false
+    preserve_sources_list: false
+    primary:
+      - arches: [amd64]
+        uri: "http://archive.ubuntu.com/ubuntu"
   storage:
     layout:
       name: direct
@@ -21,8 +22,7 @@ autoinstall:
     allow-pw: true
   packages:
     - qemu-guest-agent
-    - cloud-init
-    - openssh-server
+    - make
   user-data:
     disable_root: true
     preserve_hostname: false
@@ -37,11 +37,9 @@ autoinstall:
   package_update: true
   package_upgrade: true
   early-commands:
-    - systemctl stop systemd-networkd-wait-online.service
-    - systemctl mask systemd-networkd-wait-online.service
-    - echo 'DefaultTimeoutStartSec=30s' >> /etc/systemd/system.conf
-    - systemctl daemon-reload
+    - echo 'Acquire::ForceIPv4 "true";' > /etc/apt/apt.conf.d/99force-ipv4
   late-commands:
+    - echo 'Acquire::ForceIPv4 "true";' > /target/etc/apt/apt.conf.d/99force-ipv4
     - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
     - chmod 440 /target/etc/sudoers.d/ubuntu
     - curtin in-target --target=/target -- systemctl enable qemu-guest-agent
@@ -61,3 +59,16 @@ autoinstall:
       WantedBy=cloud-init.target
       EOF
     - curtin in-target --target=/target -- systemctl enable enable-cloud-init.service
+    - |
+      cat > /target/etc/netplan/50-cloud-init.yaml <<'EOF'
+      network:
+        version: 2
+        ethernets:
+          ens18:
+            dhcp4: true
+            nameservers:
+              addresses:
+                - 1.1.1.1
+                - 8.8.8.8
+      EOF
+    - curtin in-target --target=/target -- netplan generate

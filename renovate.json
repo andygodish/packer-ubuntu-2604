@@ -1,0 +1,38 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "customDatasources": {
+    "ubuntu-releases": {
+      "defaultRegistryUrlTemplate": "https://releases.ubuntu.com/26.04/",
+      "format": "html"
+    }
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^ubuntu\\.pkr\\.hcl$/",
+        "/^README\\.md$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) versioning=(?<versioning>\\S+)\\s+variable \\\"ubuntu_version\\\" \\{[\\s\\S]*?default\\s+=\\s+\\\"(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)\\\"",
+        "\\| Ubuntu ISO \\| `ubuntu-(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)-live-server-amd64\\.iso` \\|"
+      ],
+      "datasourceTemplate": "custom.ubuntu-releases",
+      "depNameTemplate": "ubuntu-live-server-amd64",
+      "versioningTemplate": "loose",
+      "extractVersionTemplate": "^ubuntu-(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)-live-server-amd64\\.iso$"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "ubuntu-live-server-amd64"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ],
+      "enabled": false
+    }
+  ]
+}

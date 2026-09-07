@@ -8,7 +8,7 @@ VERSION_TAG    ?= $(shell [ -s version.txt ] && printf 'v%s\n' $$(cat version.tx
 TEMPLATE_NAME  ?= ubuntu-26-04-1-template
 PACKER_FILE    := ubuntu.pkr.hcl
 PKRVARS_FILE   ?= ubuntu.pkrvars.hcl
-RENOVATE_IMAGE ?= renovate/renovate:44
+RENOVATE_IMAGE ?= renovate/renovate:latest
 REPO_ROOT      := $(shell pwd)
 
 .DEFAULT_GOAL := help
@@ -59,7 +59,6 @@ renovate-dry-run:
 		-v $(REPO_ROOT):/usr/src/app \
 		-w /usr/src/app \
 		-e LOG_LEVEL=debug \
-		-e RENOVATE_CONFIG_FILE=/usr/src/app/renovate.json \
 		$(RENOVATE_IMAGE) \
 		renovate --platform=local --dry-run=lookup --onboarding=false --require-config=optional
 

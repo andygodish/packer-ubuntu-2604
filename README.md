@@ -66,7 +66,6 @@ proxmox_node     = "your-node-name"
 
 Packer should let Proxmox assign VM MAC addresses dynamically. Do not pin a MAC in the template builder config because that value can persist into cloned VMs and cause network conflicts.
 
-
 ## Troubleshooting Notes
 
 Detailed notes from debugging the Proxmox/Packer build path are in docs/proxmox-packer-build-notes.md.
@@ -94,7 +93,7 @@ The built template records the packer project version at `/etc/packer-ubuntu-260
 
 ## Autoinstall
 
-The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs. Packer provisioning installs Docker Engine, Buildx, and the Compose plugin from Docker's apt repo when `install_docker = true` so cloned VMs are ready for compose-backed services. Set `install_docker = false` or `install_packer = false` in `ubuntu.pkrvars.hcl` to build a smaller base template without those tools.
+The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs. Packer provisioning installs Docker Engine, Buildx, and the Compose plugin from Docker's apt repo when `install_docker = true`, enables Docker and containerd at boot, and runs `docker version` as a build-time smoke test so cloned VMs are ready for compose-backed services. Set `install_docker = false` or `install_packer = false` in `ubuntu.pkrvars.hcl` to build a smaller base template without those tools.
 
 The default installer identity is only for the template build path. Review users, SSH keys, and password settings before treating this as a production baseline.
 

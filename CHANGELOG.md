@@ -1,3 +1,7 @@
+## 26.04.1-4 - 2026-09-08
+
+- [e4d45ed](https://github.com/andygodish/packer-ubuntu-2604/-/commit/e4d45ed650ef77702d88814aea88196b259d1a94) fix: enable docker and related services (#5)
+
 ## 26.04.1-3 - 2026-09-07
 
 - [fc38231](https://github.com/andygodish/packer-ubuntu-2604/-/commit/fc38231b34a0a89e8eb5c0cdfde3636572f21486) empty

@@ -20,6 +20,7 @@ This repo is part of the standalone `packer-*` series: it owns template build in
 | Cloud-init | enabled on Proxmox `local` storage |
 | Container runtime | Docker Engine from Docker apt repo when `install_docker = true`, unpinned at template build time |
 | Build tooling | Packer CLI from HashiCorp apt repo when `install_packer = true`, unpinned at template build time |
+| Object storage tooling | MinIO Client `mc` from the official MinIO binary download when `install_minio_client = true`, unpinned at template build time |
 
 Packer downloads the pinned Ubuntu installer ISO, uploads/uses it through Proxmox, serves the checked-in autoinstall seed files, installs Ubuntu into a temporary VM, runs provisioning, and converts the result to a reusable Proxmox template.
 
@@ -93,7 +94,7 @@ The built template records the packer project version at `/etc/packer-ubuntu-260
 
 ## Autoinstall
 
-The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs. Packer provisioning installs Docker Engine, Buildx, and the Compose plugin from Docker's apt repo when `install_docker = true`, enables Docker and containerd at boot, and runs `docker version` as a build-time smoke test so cloned VMs are ready for compose-backed services. Set `install_docker = false` or `install_packer = false` in `ubuntu.pkrvars.hcl` to build a smaller base template without those tools.
+The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs. Packer provisioning installs the MinIO Client `mc` binary from MinIO's official download endpoint when `install_minio_client = true`. It installs Docker Engine, Buildx, and the Compose plugin from Docker's apt repo when `install_docker = true`, enables Docker and containerd at boot, and runs `docker version` as a build-time smoke test so cloned VMs are ready for compose-backed services. Set `install_docker = false`, `install_packer = false`, or `install_minio_client = false` in `ubuntu.pkrvars.hcl` to build a smaller base template without those tools.
 
 The default installer identity is only for the template build path. Review users, SSH keys, and password settings before treating this as a production baseline.
 

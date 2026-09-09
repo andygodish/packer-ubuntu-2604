@@ -12,3 +12,6 @@ install_docker = true
 
 # Install the Packer CLI into the template.
 install_packer = true
+
+# Install the MinIO Client mc binary into the template.
+install_minio_client = true

@@ -55,6 +55,12 @@ variable "install_packer" {
   default     = true
 }
 
+variable "install_minio_client" {
+  type        = bool
+  description = "Install the MinIO Client mc binary into the template"
+  default     = true
+}
+
 locals {
   ubuntu_version_name = replace(var.ubuntu_version, ".", "-")
   ubuntu_iso_name = "ubuntu-${var.ubuntu_version}-live-server-amd64.iso"
@@ -119,7 +125,6 @@ source "proxmox-iso" "ubuntu" {
 
 build {
   sources = ["source.proxmox-iso.ubuntu"]
-
   provisioner "file" {
     source      = "version.txt"
     destination = "/tmp/packer-ubuntu-2604-version.txt"
@@ -137,6 +142,22 @@ build {
     inline = [
       "sudo apt-get update",
       "sudo apt-get upgrade -y"
+    ]
+  }
+
+  provisioner "shell" {
+    environment_vars = [
+      "INSTALL_MINIO_CLIENT=${var.install_minio_client}"
+    ]
+
+    inline = [
+      "if [ \"$INSTALL_MINIO_CLIENT\" != \"true\" ]; then echo \"Skipping MinIO Client installation.\"; exit 0; fi",
+      "ARCH=$(dpkg --print-architecture)",
+      "case \"$ARCH\" in amd64) MINIO_MC_ARCH=linux-amd64 ;; arm64) MINIO_MC_ARCH=linux-arm64 ;; *) echo \"Unsupported MinIO Client architecture: $ARCH\"; exit 1 ;; esac",
+      "curl -fsSL \"https://dl.min.io/client/mc/release/$MINIO_MC_ARCH/mc\" -o /tmp/mc",
+      "sudo install -m 0755 /tmp/mc /usr/local/bin/mc",
+      "rm -f /tmp/mc",
+      "mc --version"
     ]
   }
 

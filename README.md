@@ -21,6 +21,8 @@ This repo is part of the standalone `packer-*` series: it owns template build in
 | Container runtime | Docker Engine from Docker apt repo when `install_docker = true`, unpinned at template build time |
 | Build tooling | Packer CLI from HashiCorp apt repo when `install_packer = true`, unpinned at template build time |
 | Object storage tooling | MinIO Client `mc` from the official MinIO binary download when `install_minio_client = true`, unpinned at template build time |
+| Local Kubernetes tooling | k3d from the latest GitHub release when `install_k3d = true`, unpinned at template build time |
+| UDS tooling | UDS CLI from the latest GitHub release `.deb` when `install_uds_cli = true`, unpinned at template build time |
 
 Packer downloads the pinned Ubuntu installer ISO, uploads/uses it through Proxmox, serves the checked-in autoinstall seed files, installs Ubuntu into a temporary VM, runs provisioning, and converts the result to a reusable Proxmox template.
 
@@ -94,7 +96,7 @@ The built template records the packer project version at `/etc/packer-ubuntu-260
 
 ## Autoinstall
 
-The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs. Packer provisioning installs the MinIO Client `mc` binary from MinIO's official download endpoint when `install_minio_client = true`. It installs Docker Engine, Buildx, and the Compose plugin from Docker's apt repo when `install_docker = true`, enables Docker and containerd at boot, and runs `docker version` as a build-time smoke test so cloned VMs are ready for compose-backed services. Set `install_docker = false`, `install_packer = false`, or `install_minio_client = false` in `ubuntu.pkrvars.hcl` to build a smaller base template without those tools.
+The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs. Packer provisioning installs k3d from its latest GitHub release when `install_k3d = true`, the UDS CLI from its latest GitHub release `.deb` when `install_uds_cli = true`, and the MinIO Client `mc` binary from MinIO's official download endpoint when `install_minio_client = true`. It installs Docker Engine, Buildx, and the Compose plugin from Docker's apt repo when `install_docker = true`, enables Docker and containerd at boot, and runs `docker version` as a build-time smoke test so cloned VMs are ready for compose-backed services. Set `install_docker = false`, `install_packer = false`, `install_minio_client = false`, `install_k3d = false`, or `install_uds_cli = false` in `ubuntu.pkrvars.hcl` to build a smaller base template without those tools.
 
 The default installer identity is only for the template build path. Review users, SSH keys, and password settings before treating this as a production baseline.
 

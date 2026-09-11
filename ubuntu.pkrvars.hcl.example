@@ -15,3 +15,9 @@ install_packer = true
 
 # Install the MinIO Client mc binary into the template.
 install_minio_client = true
+
+# Install k3d into the template.
+install_k3d = true
+
+# Install the UDS CLI into the template.
+install_uds_cli = true

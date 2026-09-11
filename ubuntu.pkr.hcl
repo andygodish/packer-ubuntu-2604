@@ -61,6 +61,18 @@ variable "install_minio_client" {
   default     = true
 }
 
+variable "install_k3d" {
+  type        = bool
+  description = "Install the k3d CLI into the template"
+  default     = true
+}
+
+variable "install_uds_cli" {
+  type        = bool
+  description = "Install the UDS CLI into the template"
+  default     = true
+}
+
 locals {
   ubuntu_version_name = replace(var.ubuntu_version, ".", "-")
   ubuntu_iso_name = "ubuntu-${var.ubuntu_version}-live-server-amd64.iso"
@@ -125,6 +137,7 @@ source "proxmox-iso" "ubuntu" {
 
 build {
   sources = ["source.proxmox-iso.ubuntu"]
+
   provisioner "file" {
     source      = "version.txt"
     destination = "/tmp/packer-ubuntu-2604-version.txt"
@@ -142,6 +155,40 @@ build {
     inline = [
       "sudo apt-get update",
       "sudo apt-get upgrade -y"
+    ]
+  }
+
+  provisioner "shell" {
+    environment_vars = [
+      "INSTALL_K3D=${var.install_k3d}"
+    ]
+
+    inline = [
+      "if [ \"$INSTALL_K3D\" != \"true\" ]; then echo \"Skipping k3d installation.\"; exit 0; fi",
+      "ARCH=$(dpkg --print-architecture)",
+      "case \"$ARCH\" in amd64) K3D_ARCH=amd64 ;; arm64) K3D_ARCH=arm64 ;; *) echo \"Unsupported k3d architecture: $ARCH\"; exit 1 ;; esac",
+      "curl -fsSL \"https://github.com/k3d-io/k3d/releases/latest/download/k3d-linux-$K3D_ARCH\" -o /tmp/k3d",
+      "sudo install -m 0755 /tmp/k3d /usr/local/bin/k3d",
+      "rm -f /tmp/k3d",
+      "k3d version"
+    ]
+  }
+
+  provisioner "shell" {
+    environment_vars = [
+      "INSTALL_UDS_CLI=${var.install_uds_cli}"
+    ]
+
+    inline = [
+      "if [ \"$INSTALL_UDS_CLI\" != \"true\" ]; then echo \"Skipping UDS CLI installation.\"; exit 0; fi",
+      "ARCH=$(dpkg --print-architecture)",
+      "case \"$ARCH\" in amd64|arm64) UDS_DEB_ARCH=$ARCH ;; *) echo \"Unsupported UDS CLI architecture: $ARCH\"; exit 1 ;; esac",
+      "UDS_DEB_URL=$(curl -fsSL https://api.github.com/repos/defenseunicorns/uds-cli/releases/latest | grep -Eo '\"browser_download_url\": \"[^\"]+uds-cli-v[^\"]+-'$UDS_DEB_ARCH'\\.deb\"' | head -n 1 | sed -E 's/.*\"(https:[^\"]+)\".*/\\1/')",
+      "test -n \"$UDS_DEB_URL\"",
+      "curl -fsSL \"$UDS_DEB_URL\" -o /tmp/uds-cli.deb",
+      "sudo apt-get install -y /tmp/uds-cli.deb",
+      "rm -f /tmp/uds-cli.deb",
+      "uds version"
     ]
   }
 

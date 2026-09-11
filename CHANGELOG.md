@@ -1,3 +1,8 @@
+## 26.04.1-5 - 2026-09-11
+
+- [591e543](https://github.com/andygodish/packer-ubuntu-2604/-/commit/591e543b0c51c628b7fe6d944a5fd134125a3168) feat: uds and k3d cli (#9)
+- [9dbfb9d](https://github.com/andygodish/packer-ubuntu-2604/-/commit/9dbfb9d16194a358ef7c436fbf8b07e0e6032e7d) feat: mc cli tool (#7)
+
 ## 26.04.1-4 - 2026-09-08
 
 - [e4d45ed](https://github.com/andygodish/packer-ubuntu-2604/-/commit/e4d45ed650ef77702d88814aea88196b259d1a94) fix: enable docker and related services (#5)

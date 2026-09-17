@@ -96,10 +96,11 @@ source "proxmox-iso" "ubuntu" {
     unmount          = true
   }
 
-  memory  = 2048
-  cores   = 2
-  sockets = 1
-  os      = "l26"
+  memory   = 2048
+  cores    = 2
+  sockets  = 1
+  cpu_type = "host"
+  os       = "l26"
 
   qemu_agent      = true
   scsi_controller = "virtio-scsi-single"

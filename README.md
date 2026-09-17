@@ -16,6 +16,7 @@ This repo is part of the standalone `packer-*` series: it owns template build in
 | Template disk | `20G` raw on `local` |
 | Template memory | `2048` MB |
 | Template CPU | `2` cores |
+| Template CPU type | `host` |
 | Network | `vmbr0`, DHCP |
 | Cloud-init | enabled on Proxmox `local` storage |
 | Container runtime | Docker Engine from Docker apt repo when `install_docker = true`, unpinned at template build time |

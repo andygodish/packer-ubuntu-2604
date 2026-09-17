@@ -61,6 +61,24 @@ variable "install_minio_client" {
   default     = true
 }
 
+variable "minio_client_version" {
+  type        = string
+  description = "Pinned MinIO Client release"
+  default     = "RELEASE.2026-09-06T02-44-40Z"
+}
+
+variable "minio_client_amd64_sha256" {
+  type        = string
+  description = "SHA256 checksum for the pinned amd64 MinIO Client binary"
+  default     = "5a07c01f2e90ea3f2995d69bd69ea1a77af1d431a376e509eaa800074f789a37"
+}
+
+variable "minio_client_arm64_sha256" {
+  type        = string
+  description = "SHA256 checksum for the pinned arm64 MinIO Client binary"
+  default     = "3283b779571988a31f747f3c4f8414fa1fa20eff263ec12fd5d47278ad5e5d7b"
+}
+
 variable "install_k3d" {
   type        = bool
   description = "Install the k3d CLI into the template"
@@ -195,14 +213,18 @@ build {
 
   provisioner "shell" {
     environment_vars = [
-      "INSTALL_MINIO_CLIENT=${var.install_minio_client}"
+      "INSTALL_MINIO_CLIENT=${var.install_minio_client}",
+      "MINIO_CLIENT_VERSION=${var.minio_client_version}",
+      "MINIO_CLIENT_AMD64_SHA256=${var.minio_client_amd64_sha256}",
+      "MINIO_CLIENT_ARM64_SHA256=${var.minio_client_arm64_sha256}"
     ]
 
     inline = [
       "if [ \"$INSTALL_MINIO_CLIENT\" != \"true\" ]; then echo \"Skipping MinIO Client installation.\"; exit 0; fi",
       "ARCH=$(dpkg --print-architecture)",
-      "case \"$ARCH\" in amd64) MINIO_MC_ARCH=linux-amd64 ;; arm64) MINIO_MC_ARCH=linux-arm64 ;; *) echo \"Unsupported MinIO Client architecture: $ARCH\"; exit 1 ;; esac",
-      "curl -fsSL \"https://dl.min.io/client/mc/release/$MINIO_MC_ARCH/mc\" -o /tmp/mc",
+      "case \"$ARCH\" in amd64) MINIO_MC_ARCH=linux-amd64; MINIO_CLIENT_SHA256=$MINIO_CLIENT_AMD64_SHA256 ;; arm64) MINIO_MC_ARCH=linux-arm64; MINIO_CLIENT_SHA256=$MINIO_CLIENT_ARM64_SHA256 ;; *) echo \"Unsupported MinIO Client architecture: $ARCH\"; exit 1 ;; esac",
+      "curl -fsSL \"https://dl.min.io/aistor/mc/release/$MINIO_MC_ARCH/archive/mc.$MINIO_CLIENT_VERSION\" -o /tmp/mc",
+      "echo \"$MINIO_CLIENT_SHA256  /tmp/mc\" | sha256sum -c -",
       "sudo install -m 0755 /tmp/mc /usr/local/bin/mc",
       "rm -f /tmp/mc",
       "mc --version"
@@ -245,6 +267,17 @@ build {
       ". /etc/os-release && echo \"deb [signed-by=/etc/apt/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $${VERSION_CODENAME} main\" | sudo tee /etc/apt/sources.list.d/hashicorp.list >/dev/null",
       "sudo apt-get update",
       "sudo apt-get install -y packer"
+    ]
+  }
+
+  # Generalize the finished image so every clone gets a true first boot.
+  provisioner "shell" {
+    inline = [
+      "sudo systemctl enable ssh.socket",
+      "sudo cloud-init clean --logs --machine-id --seed",
+      "sudo rm -rf /run/cloud-init",
+      "sudo rm -f /etc/ssh/ssh_host_*",
+      "sudo sync"
     ]
   }
 }

@@ -19,9 +19,10 @@ This repo is part of the standalone `packer-*` series: it owns template build in
 | Template CPU type | `host` |
 | Network | `vmbr0`, DHCP |
 | Cloud-init | enabled on Proxmox `local` storage |
+| Clone initialization | clean cloud-init state, unique machine and SSH host keys, automatic root filesystem growth |
 | Container runtime | Docker Engine from Docker apt repo when `install_docker = true`, unpinned at template build time |
 | Build tooling | Packer CLI from HashiCorp apt repo when `install_packer = true`, unpinned at template build time |
-| Object storage tooling | MinIO Client `mc` from the official MinIO binary download when `install_minio_client = true`, unpinned at template build time |
+| Object storage tooling | MinIO Client `mc` `RELEASE.2026-09-06T02-44-40Z` from the official AIStor binary archive with SHA-256 verification when `install_minio_client = true` |
 | Local Kubernetes tooling | k3d from the latest GitHub release when `install_k3d = true`, unpinned at template build time |
 | UDS tooling | UDS CLI from the latest GitHub release `.deb` when `install_uds_cli = true`, unpinned at template build time |
 
@@ -97,7 +98,7 @@ The built template records the packer project version at `/etc/packer-ubuntu-260
 
 ## Autoinstall
 
-The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs. Packer provisioning installs k3d from its latest GitHub release when `install_k3d = true`, the UDS CLI from its latest GitHub release `.deb` when `install_uds_cli = true`, and the MinIO Client `mc` binary from MinIO's official download endpoint when `install_minio_client = true`. It installs Docker Engine, Buildx, and the Compose plugin from Docker's apt repo when `install_docker = true`, enables Docker and containerd at boot, and runs `docker version` as a build-time smoke test so cloned VMs are ready for compose-backed services. Set `install_docker = false`, `install_packer = false`, `install_minio_client = false`, `install_k3d = false`, or `install_uds_cli = false` in `ubuntu.pkrvars.hcl` to build a smaller base template without those tools.
+The checked-in `user-data` file configures the Ubuntu autoinstall. It installs OpenSSH, the QEMU guest agent, and `make`, then enables cloud-init support for cloned VMs. It also installs `growpart`, enables the SSH socket, and persists automatic root partition and filesystem growth. The final Packer provisioner clears cloud-init state, resets the machine ID, and removes SSH host keys so every clone performs a clean first boot with unique identity and host keys. Packer provisioning installs k3d from its latest GitHub release when `install_k3d = true`, the UDS CLI from its latest GitHub release `.deb` when `install_uds_cli = true`, and the pinned MinIO Client `mc` binary from MinIO's official AIStor archive with SHA-256 verification when `install_minio_client = true`. It installs Docker Engine, Buildx, and the Compose plugin from Docker's apt repo when `install_docker = true`, enables Docker and containerd at boot, and runs `docker version` as a build-time smoke test so cloned VMs are ready for compose-backed services. Set `install_docker = false`, `install_packer = false`, `install_minio_client = false`, `install_k3d = false`, or `install_uds_cli = false` in `ubuntu.pkrvars.hcl` to build a smaller base template without those tools.
 
 The default installer identity is only for the template build path. Review users, SSH keys, and password settings before treating this as a production baseline.
 

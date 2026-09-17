@@ -1,3 +1,11 @@
+## 26.04.1-6 - 2026-09-17
+
+- [7c046fa](https://github.com/andygodish/packer-ubuntu-2604/-/commit/7c046fa26f398dce83901f79ef4ca639f52ba62e) fix: exclude newlines from upver version
+- [447a48c](https://github.com/andygodish/packer-ubuntu-2604/-/commit/447a48c5d294665146c4c222fd915fd2e92713a5) empty
+- [99e26ee](https://github.com/andygodish/packer-ubuntu-2604/-/commit/99e26eee156f04093041a3bcfd71c333c19fd6e0) fix: VM disk resizing on clones (#10)
+- [2e97352](https://github.com/andygodish/packer-ubuntu-2604/-/commit/2e97352eafd5ffa1c2444dd7754a2d2336d63703) chore: removed new line in version.txt
+- [892b23f](https://github.com/andygodish/packer-ubuntu-2604/-/commit/892b23f2b3a31ee9c171c9b650a6c133c675526d) feat: use host CPU type for Proxmox template
+
 ## 26.04.1-5 - 2026-09-11
 
 - [591e543](https://github.com/andygodish/packer-ubuntu-2604/-/commit/591e543b0c51c628b7fe6d944a5fd134125a3168) feat: uds and k3d cli (#9)

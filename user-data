@@ -22,6 +22,7 @@ autoinstall:
     allow-pw: true
   packages:
     - qemu-guest-agent
+    - cloud-guest-utils
     - make
   user-data:
     disable_root: true
@@ -43,22 +44,17 @@ autoinstall:
     - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
     - chmod 440 /target/etc/sudoers.d/ubuntu
     - curtin in-target --target=/target -- systemctl enable qemu-guest-agent
+    - rm -f /target/etc/cloud/cloud-init.disabled
+    - curtin in-target --target=/target -- systemctl enable ssh.socket
     - |
-      cat > /target/etc/systemd/system/enable-cloud-init.service << 'EOF'
-      [Unit]
-      Description=Re-enable cloud-init for cloned VMs
-      Before=cloud-init-local.service
-      ConditionPathExists=/etc/cloud/cloud-init.disabled
-
-      [Service]
-      Type=oneshot
-      ExecStart=/bin/rm -f /etc/cloud/cloud-init.disabled
-      RemainAfterExit=yes
-
-      [Install]
-      WantedBy=cloud-init.target
+      cat > /target/etc/cloud/cloud.cfg.d/99-grow-root.cfg <<'EOF'
+      growpart:
+        mode: auto
+        devices:
+          - /
+        ignore_growroot_disabled: false
+      resize_rootfs: true
       EOF
-    - curtin in-target --target=/target -- systemctl enable enable-cloud-init.service
     - |
       cat > /target/etc/netplan/50-cloud-init.yaml <<'EOF'
       network:

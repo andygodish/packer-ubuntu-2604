@@ -247,4 +247,15 @@ build {
       "sudo apt-get install -y packer"
     ]
   }
+
+  # Generalize the finished image so every clone gets a true first boot.
+  provisioner "shell" {
+    inline = [
+      "sudo systemctl enable ssh.socket",
+      "sudo cloud-init clean --logs --machine-id --seed",
+      "sudo rm -rf /run/cloud-init",
+      "sudo rm -f /etc/ssh/ssh_host_*",
+      "sudo sync"
+    ]
+  }
 }

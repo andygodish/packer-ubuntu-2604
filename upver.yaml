@@ -1,6 +1,6 @@
 version:
   file: version.txt
-  pattern: '(?s)(.*)'
+  pattern: '(?m)^([^\r\n]+)$'
   group: 1
 
 upstream:

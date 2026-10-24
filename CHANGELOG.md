@@ -1,3 +1,8 @@
+## 26.04.1-7 - 2026-10-24
+
+- [db05bc0](https://github.com/andygodish/packer-ubuntu-2604/-/commit/db05bc04ab12569cd55b1e1a1b13033f6c6a2d25) fix: ignore version formatting changes in release workflow
+- [7a7d331](https://github.com/andygodish/packer-ubuntu-2604/-/commit/7a7d331378442c0dbb2e38d23d8967c1e442a237) fix: remove installer network settings from Ubuntu templates
+
 ## 26.04.1-6 - 2026-09-17
 
 - [7c046fa](https://github.com/andygodish/packer-ubuntu-2604/-/commit/7c046fa26f398dce83901f79ef4ca639f52ba62e) fix: exclude newlines from upver version

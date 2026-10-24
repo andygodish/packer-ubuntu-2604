@@ -93,8 +93,8 @@ variable "install_uds_cli" {
 
 locals {
   ubuntu_version_name = replace(var.ubuntu_version, ".", "-")
-  ubuntu_iso_name = "ubuntu-${var.ubuntu_version}-live-server-amd64.iso"
-  ubuntu_iso_url  = "https://releases.ubuntu.com/26.04/${local.ubuntu_iso_name}"
+  ubuntu_iso_name     = "ubuntu-${var.ubuntu_version}-live-server-amd64.iso"
+  ubuntu_iso_url      = "https://releases.ubuntu.com/26.04/${local.ubuntu_iso_name}"
 }
 
 source "proxmox-iso" "ubuntu" {
@@ -124,8 +124,8 @@ source "proxmox-iso" "ubuntu" {
   scsi_controller = "virtio-scsi-single"
 
   network_adapters {
-    model       = "virtio"
-    bridge      = "vmbr0"
+    model  = "virtio"
+    bridge = "vmbr0"
   }
 
   disks {
@@ -274,6 +274,8 @@ build {
   provisioner "shell" {
     inline = [
       "sudo systemctl enable ssh.socket",
+      "sudo rm -f /etc/cloud/cloud.cfg.d/00-subiquity-disable-cloudinit-networking.cfg /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg",
+      "sudo rm -f /etc/netplan/*.yaml /etc/netplan/*.yml",
       "sudo cloud-init clean --logs --machine-id --seed",
       "sudo rm -rf /run/cloud-init",
       "sudo rm -f /etc/ssh/ssh_host_*",

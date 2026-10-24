@@ -102,6 +102,21 @@ The checked-in `user-data` file configures the Ubuntu autoinstall. It installs O
 
 The default installer identity is only for the template build path. Review users, SSH keys, and password settings before treating this as a production baseline.
 
+## Release versioning
+
+Upver proposes `<Ubuntu version>-<revision>` in a release PR. Ordinary main
+pushes compute the proposal from main's version and changelog, so updating an
+open release PR keeps the same proposed revision. A version value change on
+main creates its `v`-prefixed git tag; whitespace-only changes to `version.txt`
+follow the ordinary upver PR path instead of publishing the same tag again.
+
+Tag creation can be retried when the existing tag points to the same commit.
+An existing tag at a different commit fails explicitly and is never moved.
+For the newline-only `26.04.1-6` failure, leave `v26.04.1-6` unchanged, push the
+workflow fix, and merge the next upver proposal (`26.04.1-7`). Rerunning the
+old workflow run alone still uses its old workflow code. Packer builds remain
+operator actions; tagging does not rebuild the Proxmox template.
+
 ## Out Of Scope
 
 This repo should not contain OpenTofu/Terraform state, providers, plans, or VM deployment resources. Clone/deploy logic for specific services should live in a future `tofu-*` repo.

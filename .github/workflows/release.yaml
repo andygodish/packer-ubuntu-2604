@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write
@@ -23,19 +27,22 @@ jobs:
 
       - name: Classify push
         id: classify
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
         run: |
-          BEFORE="${{ github.event.before }}"
-          AFTER="${{ github.sha }}"
 
           if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
-            echo "is_release_merge=false" >> $GITHUB_OUTPUT
+            echo "is_release_merge=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          if git diff --name-only "$BEFORE" "$AFTER" | grep -qx "version.txt"; then
-            echo "is_release_merge=true" >> $GITHUB_OUTPUT
+          BEFORE_VERSION=$(git show "$BEFORE:version.txt" | tr -d '[:space:]' | sed 's/^v//')
+          AFTER_VERSION=$(git show "$AFTER:version.txt" | tr -d '[:space:]' | sed 's/^v//')
+          if [ "$BEFORE_VERSION" != "$AFTER_VERSION" ]; then
+            echo "is_release_merge=true" >> "$GITHUB_OUTPUT"
           else
-            echo "is_release_merge=false" >> $GITHUB_OUTPUT
+            echo "is_release_merge=false" >> "$GITHUB_OUTPUT"
           fi
 
   bump-and-pr:
@@ -49,11 +56,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Sync pre-existing release files
-        run: |
-          git fetch origin release/upver:release/upver || true
-          git checkout release/upver -- CHANGELOG.md version.txt || true
-
+      # Compute from main so updating an open release PR does not consume
+      # another revision from the pending release branch.
       - name: Install upver
         run: |
           curl -fsSL -o /usr/local/bin/upver \
@@ -89,14 +93,23 @@ jobs:
       - name: Read version
         id: ver
         run: |
-          RAW_VERSION=$(cat version.txt)
+          RAW_VERSION=$(tr -d '[:space:]' < version.txt)
           VERSION="${RAW_VERSION#v}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "v_version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "v_version=v$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Create tag
+        env:
+          RELEASE_TAG: ${{ steps.ver.outputs.v_version }}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "${{ steps.ver.outputs.v_version }}"
-          git push origin "${{ steps.ver.outputs.v_version }}"
+          if git rev-parse --verify "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            EXISTING_COMMIT=$(git rev-list -n 1 "$RELEASE_TAG")
+            if [ "$EXISTING_COMMIT" != "$GITHUB_SHA" ]; then
+              echo "Tag $RELEASE_TAG already belongs to $EXISTING_COMMIT; refusing to move it to $GITHUB_SHA." >&2
+              exit 1
+            fi
+            echo "Tag $RELEASE_TAG already exists at this commit; nothing to publish."
+          else
+            git tag "$RELEASE_TAG" "$GITHUB_SHA"
+            git push origin "refs/tags/$RELEASE_TAG"
+          fi
